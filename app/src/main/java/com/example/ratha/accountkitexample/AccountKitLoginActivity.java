@@ -9,8 +9,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.ratha.accountkitexample.entity.AccountInfo;
 import com.facebook.accountkit.AccessToken;
+import com.facebook.accountkit.Account;
 import com.facebook.accountkit.AccountKit;
+import com.facebook.accountkit.AccountKitCallback;
 import com.facebook.accountkit.AccountKitError;
 import com.facebook.accountkit.AccountKitLoginResult;
 import com.facebook.accountkit.ui.AccountKitActivity;
@@ -21,6 +24,7 @@ public class AccountKitLoginActivity extends AppCompatActivity {
 
     static  final int APP_REQUEST_CODE=99;
     AccessToken accessToken= AccountKit.getCurrentAccessToken();
+    AccountInfo accountInfo;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,7 +41,7 @@ public class AccountKitLoginActivity extends AppCompatActivity {
             AccountKitConfiguration.AccountKitConfigurationBuilder configurationBuilder =
                     new AccountKitConfiguration.AccountKitConfigurationBuilder(
                             LoginType.PHONE,
-                            AccountKitActivity.ResponseType.CODE); // or .ResponseType.TOKEN
+                            AccountKitActivity.ResponseType.TOKEN); // or .ResponseType.TOKEN
             // ... perform additional configuration ...
             intent.putExtra(
                     AccountKitActivity.ACCOUNT_KIT_ACTIVITY_CONFIGURATION,
@@ -48,6 +52,23 @@ public class AccountKitLoginActivity extends AppCompatActivity {
 
     public void showErrorActivity(AccountKitError errorMessage){
 
+    }
+
+    public void accountInformation(){
+            AccountKit.getCurrentAccount(new AccountKitCallback<Account>() {
+                @Override
+                public void onSuccess(Account account) {
+                    accountInfo =new AccountInfo();
+                    accountInfo.setAccountId(account.getId());
+                    accountInfo.setPhoneNumber(account.getPhoneNumber().toString());
+                    Log.e("account-info->",accountInfo.toString());
+                }
+
+                @Override
+                public void onError(AccountKitError accountKitError) {
+                    Log.e("error->",accountKitError.getUserFacingMessage().toString());
+                }
+            });
     }
     public void goToMyLoggedInActivity(){
         Intent intent=new Intent(this,MainActivity.class);
@@ -78,7 +99,7 @@ public class AccountKitLoginActivity extends AppCompatActivity {
                     // If you have an authorization code, retrieve it from
                     // loginResult.getAuthorizationCode()
                     // and pass it to your server and exchange it for an access token.
-
+                    accountInformation();
                     // Success! Start your next activity...
                     goToMyLoggedInActivity();
                 }
